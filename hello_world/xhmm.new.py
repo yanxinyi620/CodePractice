@@ -10,8 +10,9 @@ CNV = namedtuple('CNV', ('chrom', 'start', 'end', 'name', 'type', 'score', 'leng
 
 
 def main(runID, prob_cutoff, cnv_len_cutoff):
-    df = pd.read_table(runID+'.posteriors.DEL.txt' , sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
-    
+    df_del = pd.read_table(runID+'.posteriors.DEL.txt' , sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
+    df_dup = pd.read_table(runID+'.posteriors.DUP.txt' , sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
+
     # get zscore
     zscore = runID+'.PCA_normalized.filtered.sample_zscores.RD.txt'
     df_zs = pd.read_table(zscore, sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
@@ -23,9 +24,12 @@ def main(runID, prob_cutoff, cnv_len_cutoff):
     df_rd = pd.read_table(rd, sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
     df_rd=df_rd.astype(float)
     
-    for i in range(df.shape[0]):
-        line = df.iloc[[i]]
-        cnv = get_cnv(line, prob_cutoff, cnv_len_cutoff, 'del')
+    for i in range(df_del.shape[0]):
+        line1 = df_del.iloc[[i]]
+        line2 = df_dup.iloc[[i]]
+        cnv1 = get_cnv(line1, prob_cutoff, cnv_len_cutoff, 'del')
+        cnv2 = get_cnv(line2, prob_cutoff, cnv_len_cutoff, 'dup')
+        cnv = pd.concat([cnv1, cnv2])
         if cnv.empty:
             pass
         else:
@@ -41,31 +45,7 @@ def main(runID, prob_cutoff, cnv_len_cutoff):
             
             # write sample cnv format
             f = open(runID+'.result.cnv.txt', 'a')
-            cnv = cnv.sort_values(by='length',ascending=False)
-            sample = list(cnv['name'])[0]
-            cnvindex = list(cnv.columns)
-            samplecnv=[]
-            for k in range(cnv.shape[0]):
-                c1 = cnv.iloc[k,cnvindex.index('type')]
-                c2 = cnv.iloc[k,cnvindex.index('chrom')]
-                c3 = str(cnv.iloc[k,cnvindex.index('start')])
-                c4 = str(cnv.iloc[k,cnvindex.index('end')])
-                c5 = cnv.iloc[k,cnvindex.index('length')]
-                
-                if c5>1000000:
-                    c5 = str(round(c5/1000000,1))+'Mb'
-                elif c5>1000:
-                    c5 = str(round(c5/1000,0))+'Kb'
-                
-                if abs(cnv.iloc[k,cnvindex.index('zscore')])>3:
-                    c6 = '-M'
-                else:
-                    c6 = ''
-                
-                cnvline = c1+'('+c2+':'+c3+'-'+c4+','+c5+')'+c6
-                samplecnv.append(cnvline)
-            
-            samplecnv = sample+'\t'+';'.join(samplecnv)
+            samplecnv = get_samplecnv(cnv)
             print(samplecnv, file=f)
 
 
@@ -138,6 +118,35 @@ def get_rd(cnv, df_rd):
         cnv.iloc[i,-2] = round(rdmean,3)
         cnv.iloc[i,-1] = round(rdmean/df_rd.iloc[samplenum].mean(),3)
     return cnv
+
+
+def get_samplecnv(cnv):
+    cnv = cnv.sort_values(by='length',ascending=False)
+    sample = list(cnv['name'])[0]
+    cnvindex = list(cnv.columns)
+    samplecnv=[]
+    for k in range(cnv.shape[0]):
+        c1 = cnv.iloc[k,cnvindex.index('type')]
+        c2 = cnv.iloc[k,cnvindex.index('chrom')]
+        c3 = str(cnv.iloc[k,cnvindex.index('start')])
+        c4 = str(cnv.iloc[k,cnvindex.index('end')])
+        c5 = cnv.iloc[k,cnvindex.index('length')]
+        
+        if c5>1000000:
+            c5 = str(round(c5/1000000,1))+'Mb'
+        elif c5>1000:
+            c5 = str(round(c5/1000))+'Kb'
+        
+        if abs(cnv.iloc[k,cnvindex.index('zscore')])>3:
+            c6 = '-M'
+        else:
+            c6 = ''
+        
+        cnvline = c1+'('+c2+':'+c3+'-'+c4+','+c5+')'+c6
+        samplecnv.append(cnvline)
+    
+    samplecnv = sample+'\t'+';'.join(samplecnv)
+    return samplecnv
 
 
 if __name__ == '__main__':

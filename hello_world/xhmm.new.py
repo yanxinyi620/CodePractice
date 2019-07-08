@@ -9,23 +9,23 @@ from collections import namedtuple
 CNV = namedtuple('CNV', ('chrom', 'start', 'end', 'name', 'type', 'score', 'length', 'count', 'number'))
 
 
-def main(input, prob_cutoff, cnv_len_cutoff):
-    df = pd.read_table(input, sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
+def main(runID, prob_cutoff, cnv_len_cutoff):
+    df = pd.read_table(runID+'.posteriors.DEL.txt' , sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
     
     # get zscore
-    zscore = run+'.PCA_normalized.filtered.sample_zscores.RD.txt'
-    #zscore = run+'.PCA_normalized.txt'
+    zscore = runID+'.PCA_normalized.filtered.sample_zscores.RD.txt'
     df_zs = pd.read_table(zscore, sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
     df_zs = df_zs.astype(float)
     
     # get reads number
-    rd = run+'.RD.txt'
+    rd = runID+'.RD.txt'
+    #rd = runID+'.PCA_normalized.txt'
     df_rd = pd.read_table(rd, sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
     df_rd=df_rd.astype(float)
     
     for i in range(df.shape[0]):
         line = df.iloc[[i]]
-        cnv = get_cnv(line, prob_cutoff, cnv_len_cutoff)
+        cnv = get_cnv(line, prob_cutoff, cnv_len_cutoff, 'del')
         if cnv.empty:
             pass
         else:
@@ -37,10 +37,39 @@ def main(input, prob_cutoff, cnv_len_cutoff):
             cnv = get_rd(cnv, df_rd)
             
             # write result
-            cnv.to_csv(run+'.result.txt', sep='\t', header=False, index=False, mode='a')
+            cnv.to_csv(runID+'.result.txt', sep='\t', header=False, index=False, mode='a')
+            
+            # write sample cnv format
+            f = open(runID+'.result.cnv.txt', 'a')
+            cnv = cnv.sort_values(by='length',ascending=False)
+            sample = list(cnv['name'])[0]
+            cnvindex = list(cnv.columns)
+            samplecnv=[]
+            for k in range(cnv.shape[0]):
+                c1 = cnv.iloc[k,cnvindex.index('type')]
+                c2 = cnv.iloc[k,cnvindex.index('chrom')]
+                c3 = str(cnv.iloc[k,cnvindex.index('start')])
+                c4 = str(cnv.iloc[k,cnvindex.index('end')])
+                c5 = cnv.iloc[k,cnvindex.index('length')]
+                
+                if c5>1000000:
+                    c5 = str(round(c5/1000000,1))+'Mb'
+                elif c5>1000:
+                    c5 = str(round(c5/1000,0))+'Kb'
+                
+                if abs(cnv.iloc[k,cnvindex.index('zscore')])>3:
+                    c6 = '-M'
+                else:
+                    c6 = ''
+                
+                cnvline = c1+'('+c2+':'+c3+'-'+c4+','+c5+')'+c6
+                samplecnv.append(cnvline)
+            
+            samplecnv = sample+'\t'+';'.join(samplecnv)
+            print(samplecnv, file=f)
 
 
-def get_cnv(line, prob_cutoff, cnv_len_cutoff):
+def get_cnv(line, prob_cutoff, cnv_len_cutoff, type):
     line = line.iloc[0]
     lineindex = list(line.index)
     line = line.astype(float)
@@ -72,7 +101,7 @@ def get_cnv(line, prob_cutoff, cnv_len_cutoff):
             end = int(pos.split('-')[1])
             score = float("%.3f" % line[j])
             length = end - start
-            cnv = CNV(chrom, start, end, name, 'del', score, length, count, number)
+            cnv = CNV(chrom, start, end, name, type, score, length, count, number)
             cnv_line.append(cnv)
 
     cnv_line = pd.DataFrame(cnv_line)
@@ -118,11 +147,13 @@ if __name__ == '__main__':
     options.add_argument('-n', '--len', default=500000, help='cnv length cutoff')
     
     args = options.parse_args()
-    run = args.input.split('.')[0]
-    os.system('echo "chrom\tstart\tend\tname\ttype\tscore\tlength\tcount\tnumber\tzscore\tmeanrd\tcopyratio" > %s' % (run+'.result.txt'))
-    main(args.input, float(args.prob), int(args.len))
+    #runID = args.input.split('.')[0]
+    runID = args.input
+    os.system('echo "chrom\tstart\tend\tname\ttype\tscore\tlength\tcount\tnumber\tzscore\tmeanrd\tcopyratio" > %s' % (runID+'.result.txt'))
+    os.system('echo "sample\tcnv" > %s' % (runID+'.result.cnv.txt'))
+    main(runID, float(args.prob), int(args.len))
 
-# py3 xhmm.new.py -i RunSZ012151.posteriors.DEL.txt -p 0.9 -n 500000 &
+# py3 xhmm.new.py -i RunSZ012151 -p 0.9 -n 500000 &
 
 
 

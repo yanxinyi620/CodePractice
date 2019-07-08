@@ -24,6 +24,8 @@ def main(runID, prob_cutoff, cnv_len_cutoff):
     df_rd = pd.read_table(rd, sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
     df_rd=df_rd.astype(float)
     
+    f = open(runID+'.result.cnv.txt', 'a')
+
     for i in range(df_del.shape[0]):
         line1 = df_del.iloc[[i]]
         line2 = df_dup.iloc[[i]]
@@ -44,7 +46,6 @@ def main(runID, prob_cutoff, cnv_len_cutoff):
             cnv.to_csv(runID+'.result.txt', sep='\t', header=False, index=False, mode='a')
             
             # write sample cnv format
-            f = open(runID+'.result.cnv.txt', 'a')
             samplecnv = get_samplecnv(cnv)
             print(samplecnv, file=f)
 

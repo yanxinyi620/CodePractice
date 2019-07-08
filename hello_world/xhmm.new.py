@@ -14,6 +14,7 @@ def main(input, prob_cutoff, cnv_len_cutoff):
     
     # get zscore
     zscore = run+'.PCA_normalized.filtered.sample_zscores.RD.txt'
+    #zscore = run+'.PCA_normalized.txt'
     df_zs = pd.read_table(zscore, sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
     df_zs = df_zs.astype(float)
     

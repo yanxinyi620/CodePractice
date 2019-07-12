@@ -122,7 +122,7 @@ def get_rd(cnv, df_rd):
 
 
 def get_samplecnv(cnv):
-    cnv = cnv.sort_values(by='length',ascending=False)
+    # cnv = cnv.sort_values(by='length',ascending=False)
     sample = list(cnv['name'])[0]
     cnvindex = list(cnv.columns)
     samplecnv=[]

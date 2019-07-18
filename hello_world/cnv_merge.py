@@ -70,12 +70,14 @@ def get_mergecnv(cnvlist, gaplen):
                 cnv_merge.append(list(line))
         
     cnvmerge = pd.DataFrame(cnv_merge)
-    
-    if  k!=0:
-        print(str(k))
-        get_mergecnv(cnvmerge, gaplen)
-    
-    return cnvmerge
+
+
+    if  k==0:
+        print('yes:'+str(k))
+        return cnvmerge
+        
+    print('no:'+str(k))
+    return get_mergecnv(cnvmerge, gaplen)
 
 
 def main(fcnv, gaplen):
@@ -90,7 +92,7 @@ def main(fcnv, gaplen):
 if __name__ == '__main__':
     options = argparse.ArgumentParser(description='Result Filter')
     options.add_argument('-c', '--cnv', required=True, help='cnv file')
-    options.add_argument('-l', '--gaplen', required=True, help='gap length')
+    options.add_argument('-l', '--gaplen', default=0.1, help='gap length')
     
     args = options.parse_args()
     main(args.cnv, float(args.gaplen))

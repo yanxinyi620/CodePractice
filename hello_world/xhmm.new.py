@@ -24,7 +24,7 @@ def main(runID, prob_cutoff, cnv_len_cutoff):
     df_rd = pd.read_table(rd, sep='\t', header=0, low_memory=False, dtype='str', index_col=0)
     df_rd=df_rd.astype(float)
     
-    f = open(runID+'.result.cnv.txt', 'a')
+    f = open(os.path.basename(runID)+'.result.cnv.txt', 'a')
 
     for i in range(df_del.shape[0]):
         line1 = df_del.iloc[[i]]
@@ -43,7 +43,7 @@ def main(runID, prob_cutoff, cnv_len_cutoff):
             cnv = get_rd(cnv, df_rd)
             
             # write result
-            cnv.to_csv(runID+'.result.txt', sep='\t', header=False, index=False, mode='a')
+            cnv.to_csv(os.path.basename(runID)+'.result.txt', sep='\t', header=False, index=False, mode='a')
             
             # write sample cnv format
             samplecnv = get_samplecnv(cnv)
@@ -159,8 +159,8 @@ if __name__ == '__main__':
     args = options.parse_args()
     #runID = args.input.split('.')[0]
     runID = args.input
-    os.system('echo "chrom\tstart\tend\tname\ttype\tscore\tlength\tcount\tnumber\tzscore\tmeanrd\tcopyratio" > %s' % (runID+'.result.txt'))
-    os.system('echo "sample\tcnv" > %s' % (runID+'.result.cnv.txt'))
+    os.system('echo "chrom\tstart\tend\tname\ttype\tscore\tlength\tcount\tnumber\tzscore\tmeanrd\tcopyratio" > %s' % (os.path.basename(runID)+'.result.txt'))
+    os.system('echo "sample\tcnv" > %s' % (os.path.basename(runID)+'.result.cnv.txt'))
     main(runID, float(args.prob), int(args.len))
 
 # py3 xhmm.new.py -i RunSZ012151 -p 0.9 -n 500000 &

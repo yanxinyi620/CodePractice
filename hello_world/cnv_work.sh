@@ -14,11 +14,12 @@ cat *.result.txt |awk '$4~"CL100125020"||$4~"CL100125106"{print$0}' > cnvresult.
 
 # merge cnv
 # /home/pengjiguang/miniconda3/bin/python ${path}cnv_merge.py -c cnvresult.bed -l 5000000
-/home/pengjiguang/miniconda3/bin/python ${path}cnv_merge.py -c cnvresult.bed -l 0.1
+/home/pengjiguang/miniconda3/bin/python ${path}cnv_merge.py -c cnvresult.bed -l 0.2
 
 # cnv list get gene and disease
-/home/pengjiguang/miniconda3/bin/python ${path}cnv2genedisease.py -c cnvresult.bed.merge -g ${path}omim.dominant.gene.bed -d ${path}disease.bed
-/home/pengjiguang/miniconda3/bin/python ${path}cnv2genedisease.py -c arraycnv.bed -g ${path}omim.dominant.gene.bed -d ${path}disease.bed
+# -p gene -l disease
+/home/pengjiguang/miniconda3/bin/python ${path}cnv2genedisease.py -c cnvresult.bed.merge -g ${path}omim.dominant.gene.bed -d ${path}disease.bed -p 0.5 -l 0.5
+/home/pengjiguang/miniconda3/bin/python ${path}cnv2genedisease.py -c arraycnv.bed -g ${path}omim.dominant.gene.bed -d ${path}disease.bed -p 0.5 -l 0.5
 
 # cnv and arraycnv.bed mastch
 /home/pengjiguang/miniconda3/bin/python ${path}get_cnv.py -c cnvresult.bed.merge.disease.gene.txt -a arraycnv.bed.disease.gene.txt

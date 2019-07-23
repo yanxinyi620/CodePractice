@@ -7,8 +7,10 @@ import os
 # input=sys.argv[1]
 # out=sys.argv[2]
 
+
 def tran2bedformat(df):
 
+    # df = df[df[1]!='start'].copy()
     df.iloc[:,0] = df.iloc[:,0].replace(['chr','Chr','CHR'], ['','',''], regex=True)
     df.iloc[:,0] = df.iloc[:,0].replace(['23','24'], ['X','Y'])
     df.iloc[:,1] = df.iloc[:,1].astype(int)
@@ -17,65 +19,58 @@ def tran2bedformat(df):
     return df
 
 
-def get_gene(cnvlist, genelist, overlap_prop):
+def num2hf(num):
 
-    cnvlist = tran2bedformat(cnvlist)
-    genelist = tran2bedformat(genelist)
+    # trans number to human format
+    if num > 1000000:
+        num = str(round(num/1000000,1))+'Mb'
+    elif num > 1000:
+        num = str(int(num/1000))+'Kb'
+    else:
+        num = str(num)+'Bp'
 
-    cnv_gene = []
-    for i in range(cnvlist.shape[0]):
-        line = cnvlist.iloc[i]
-        linegene = genelist[(genelist[0]==line[0]) & (genelist[1]<line[2]) & (genelist[2]>line[1])]
-        if len(linegene) > 0:
-            cgene = []
-            for j in range(len(linegene)):
-                overlap = min(linegene.iloc[j][2], line[2]) - max(linegene.iloc[j][1], line[1])
-                prop = round(overlap/(linegene.iloc[j][2] - linegene.iloc[j][1]),2) 
-                if  prop >= overlap_prop:
-                    cgenetmp = linegene.iloc[j][3]+'|'+str(prop)
-                    cgene.append(cgenetmp)
+    return num
+
+
+def get_overlap(df1, df2, cutoff, result_num):
+    
+    df1 = tran2bedformat(df1)
+    df2 = tran2bedformat(df2)
+    res = result_num
+
+    df_overlap = []
+
+    for i in range(df1.shape[0]):
+        line = df1.iloc[i]
+        linedf2 = df2[(df2[0]==line[0]) & (df2[1]<line[2]) & (df2[2]>line[1])]
+
+        if len(linedf2) > 0:
+            cdf2 = []
+            for j in range(len(linedf2)):
+                overlap = min(linedf2.iloc[j][2], line[2]) - max(linedf2.iloc[j][1], line[1])
+                lendf2 = linedf2.iloc[j][2] - linedf2.iloc[j][1]
+                prop = round(overlap/lendf2, 2)
+
+                if cutoff <= 1 and prop >= cutoff:
+                    lendf2 = num2hf(lendf2)
+                    df2tmp = df2.iloc[j][res]+'|'+str(prop)+'/'+lendf2
+                    cdf2.append(df2tmp)
+
+                elif cutoff > 1 and overlap >= cutoff:
+                    lendf2 = num2hf(lendf2)
+                    overlap = num2hf(overlap)
+                    df2tmp = df2.iloc[j][res]+'|'+overlap+'/'+lendf2
+                    cdf2.append(df2tmp)
+
                 else:
-                    cgene.append('<'+str(overlap_prop))
+                    cdf2.append('<'+str(cutoff))
 
-            cnv_gene.append(list(line)+[';'.join(cgene)])
+            df_overlap.append(list(line)+[';'.join(cdf2)])
         else:
-            cnv_gene.append(list(line)+['NA'])
+            df_overlap.append(list(line)+['NA'])
 
-    cnvgene = pd.DataFrame(cnv_gene)
-    return cnvgene
-
-
-def get_disease(cnvlist, diseaselist, overlap_len):
-
-    cnvlist = tran2bedformat(cnvlist)
-    diseaselist = tran2bedformat(diseaselist)
-
-    cnv_disease = []
-    for i in range(cnvlist.shape[0]):
-        line = cnvlist.iloc[i]
-        linedisease = diseaselist[(diseaselist[0]==line[0]) & (diseaselist[3]==line[4]) & (diseaselist[1]<line[2]) & (diseaselist[2]>line[1])]
-        if len(linedisease) > 0:
-            cdisease = []
-            for j in range(len(linedisease)):
-                overlap = min(linedisease.iloc[j][2], line[2]) - max(linedisease.iloc[j][1], line[1])
-                if  overlap >= overlap_len:
-                    if overlap > 1000000:
-                        overlap = str(round(overlap/1000000,1))+'Mb'
-                    else:
-                        overlap = str(round(overlap/1000,0))+'Kb'
-
-                    cdiseasetmp = linedisease.iloc[j][5]+'|'+overlap+'/'+linedisease.iloc[j][4]
-                    
-                    cdisease.append(cdiseasetmp)
-                else:
-                    cdisease.append('<'+str(overlap_len))
-
-            cnv_disease.append(list(line)+[';'.join(cdisease)])
-        else:
-            cnv_disease.append(list(line)+['NA'])
-
-    cnvdisease = pd.DataFrame(cnv_disease)
-    return cnvdisease
+    dfoverlap = pd.DataFrame(df_overlap)
+    return dfoverlap
 
 
 def main(fcnv, fgene, fdisease, prob, length):
@@ -89,10 +84,10 @@ def main(fcnv, fgene, fdisease, prob, length):
     diseaselist = pd.read_table(fdisease, sep='\t', low_memory=False, dtype='str', header=None)
     diseaselist = diseaselist[diseaselist.iloc[:,1]!='start']
 
-    cnvdisease = get_disease(cnvlist, diseaselist, length)
+    cnvdisease = get_overlap(cnvlist, diseaselist, length, 5)
     cnvdisease.to_csv(os.path.basename(args.cnv)+'.disease.txt', sep='\t', header=False, index=False, mode='w')
 
-    cnvgene = get_gene(cnvdisease, genelist, prob)
+    cnvgene = get_overlap(cnvdisease, genelist, prob, 3)
     cnvgene.to_csv(os.path.basename(args.cnv)+'.disease.gene.txt', sep='\t', header=False, index=False, mode='w')
 
 
@@ -101,10 +96,10 @@ if __name__ == '__main__':
     options.add_argument('-c', '--cnv', required=True, help='cnv file')
     options.add_argument('-g', '--gene', required=True, help='gene file')
     options.add_argument('-d', '--disease', required=True, help='disease file')
-    options.add_argument('-p', '--prob', default=0.5, help='probability cutoff')
-    options.add_argument('-n', '--len', default=500000, help='cnv length cutoff')
+    options.add_argument('-p', '--prob', default=0.5, help='gene overlap length or probability cutoff')
+    options.add_argument('-l', '--len', default=500000, help='disease overlap length or probability cutoff')
     
     args = options.parse_args()
-    main(args.cnv, args.gene, args.disease, float(args.prob), int(args.len))
+    main(args.cnv, args.gene, args.disease, float(args.prob), float(args.len))
 
 

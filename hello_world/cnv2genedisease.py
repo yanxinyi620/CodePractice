@@ -53,13 +53,13 @@ def get_overlap(df1, df2, cutoff, result_num):
 
                 if cutoff <= 1 and prop >= cutoff:
                     lendf2 = num2hf(lendf2)
-                    df2tmp = df2.iloc[j][res]+'|'+str(prop)+'/'+lendf2
+                    df2tmp = linedf2.iloc[j][res]+'|'+str(prop)+'/'+lendf2
                     cdf2.append(df2tmp)
 
                 elif cutoff > 1 and overlap >= cutoff:
                     lendf2 = num2hf(lendf2)
                     overlap = num2hf(overlap)
-                    df2tmp = df2.iloc[j][res]+'|'+overlap+'/'+lendf2
+                    df2tmp = linedf2.iloc[j][res]+'|'+overlap+'/'+lendf2
                     cdf2.append(df2tmp)
 
                 else:

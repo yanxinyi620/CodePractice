@@ -86,7 +86,7 @@ def main(fcnv, gaplen):
     cnvlist = cnvlist[cnvlist.iloc[:,1]!='start']
 
     mergecnv = get_mergecnv(cnvlist, gaplen)
-    mergecnv.to_csv(os.path.basename(args.cnv)+'.merge', sep='\t', header=False, index=False, mode='w')
+    mergecnv.to_csv(os.path.basename(args.cnv)+'.merge.tmp', sep='\t', header=False, index=False, mode='w')
 
 
 if __name__ == '__main__':

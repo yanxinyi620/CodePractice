@@ -20,30 +20,35 @@ do
     cat ./$result/$sample.f.fq ./$result/$sample.m.fq > ./$result/$sample.fq
     gzip ./$result/$sample.fq
     # rm ./$result/$sample*.fq ./$result/$sample*.aln
-    
 
     # 模拟样本比对，fastq2sam
     bwa aln -o0 -e10 -i0 -M0 -E4 -O11 -L -t10 -l12 -k2 /home/yanxinyi/project/niftypub/nifty_xhmm/program/index/reference.fa ./$result/$sample.fq.gz >./$result/$sample.sai && \
     bwa samse /home/yanxinyi/project/niftypub/nifty_xhmm/program/index/reference.fa ./$result/$sample.sai ./$result/$sample.fq.gz >./$result/$sample.sam &
-    '''
-
+    
     # sam2ext
     Sam2EXT -i ./$result/$sample.sam -e ./$result/$sample.ext.gz -s ./$result/$sample.stat -W ./$result/$sample.win.gz
+    '''
 
+    # ext2ratio
+    perl /home/yanxinyi/project/niftypub/nifty_xhmm/Microdel_V3.0/statgc.rmdup.pl ./$result/$sample.ext.gz ./$result/
+    /usr/bin/perl /home/yanxinyi/project/niftypub/nifty_xhmm/Microdel_V3.0/Ratio.Loose.pl -window /home/yanxinyi/project/niftypub/nifty_xhmm/program/window/win.Tags100k.noSlide.Hg19.gz -ext ./$result/$sample.stat.gc -out ./$result/$sample.NIFTY.ratio
 
-
+    # ratio2depth
+    awk '{printf ("%.1f\n",$6)}' ./$result/$sample.NIFTY.ratio >./$result/$sample.male.depth
+    sed -i "1i$sample" ./$result/$sample.male.depth
 
 done
 
+paste  ./$result/*.male.depth | trans >./male.depth
+echo 'male' >./male.list
 
+perl xhmm.pl male.list 1.6
+
+
+
+# simu_result/simu_01.NIFTY.ratio
 
 wait
-
-
-result='./'
-sample='simu_01'
-perl /home/yanxinyi/project/niftypub/nifty_xhmm/Microdel_V3.0/statgc.rmdup.pl ./$result/$sample.ext.gz ./$result/
-/usr/bin/perl /home/yanxinyi/project/niftypub/nifty_xhmm/Microdel_V3.0/Ratio.Loose.pl -window /home/yanxinyi/project/niftypub/nifty_xhmm/program/window/win.Tags100k.noSlide.Hg19.gz -ext ./$result/$sample.stat.gc -out ./$result/$sample.NIFTY.ratio
 
 
 result='./'
@@ -52,10 +57,10 @@ perl /home/yanxinyi/project/niftypub/nifty_xhmm/Microdel_V3.0/statgc.rmdup.pl ./
 /usr/bin/perl /home/yanxinyi/project/niftypub/nifty_xhmm/Microdel_V3.0/Ratio.Loose.pl -window /home/yanxinyi/project/niftypub/nifty_xhmm/program/window/win.Tags100k.noSlide.Hg19.gz -ext ./$result/$sample.stat.gc -out ./$result/$sample.NIFTY.ratio
 
 
-awk '{printf ("%.1f\n",$6)}' $sample.NIFTY.ratio >$sample.male.depth;
-sed -i "1i$sample" $sample.male.depth
+awk '{printf ("%.1f\n",$6)}' ./$result/$sample.NIFTY.ratio >./$result/$sample.male.depth
+sed -i "1i$sample" ./$result/$sample.male.depth
 
-paste  *.male.depth | trans >male.depth
+paste  ./$result*.male.depth | trans >male.depth
 
 
 

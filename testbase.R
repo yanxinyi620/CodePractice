@@ -57,6 +57,23 @@ summarise(iris, avg = mean(Sepal.Length))
 summarise(group_by(iris,Species),sd=sd(Petal.Width))
 iris %>% group_by(Species) %>% summarise(sd=sd(Petal.Width))
 
+library(reshape2)
+# reshape 包 数据融合与重铸
+mydata <- data.frame(
+  ID = c(1,1,2,2),
+  Time = c(1,2,1,2),
+  X1 = c(5,3,6,2),
+  X2 = c(6,5,1,4)
+)
+
+md <- melt(mydata, id = c("ID","Time"))
+
+dcast(md, ID ~ variable, mean)
+dcast(md, Time ~ variable, mean)
+dcast(md, ID ~ Time, mean)
+dcast(md, ID + Time ~ variable) # 不执行整合
+dcast(md, ID + variable ~ Time)
+
 
 # --------------------------------------------------------------
 # 数据处理
@@ -86,3 +103,6 @@ firstname <- sapply(name , "[", 1)
 roster <- cbind(firstname, lastname, roster[, -1])
 roster <- roster[order(lastname, firstname), ]
 roster
+
+
+

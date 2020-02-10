@@ -10,8 +10,12 @@ function_group = pd.read_table(function_group, header=0, sep='\t', dtype='str')
 anno_hgmd_group = pd.merge(anno_hgmd_popmax, function_group, on='Function', how='left')
 
 anno_hgmd_group['af_filter'] = 'Fail'
-anno_hgmd_group.af_filter[(anno_hgmd_group.Exception.notna()) | 
-    (anno_hgmd_group.popmax_filter<'0.003') |  (anno_hgmd_group.popmax_filter.isna())] = 'Pass'
+anno_hgmd_group.popmax_filter = anno_hgmd_group.popmax_filter.astype('float')
+# anno_hgmd_group.af_filter[(anno_hgmd_group.Exception.notna()) | 
+#     (anno_hgmd_group.popmax_filter<0.003) |  (anno_hgmd_group.popmax_filter.isna())] = 'Pass'
+anno_hgmd_group.loc[(anno_hgmd_group.Exception.notna()) | (anno_hgmd_group.popmax_filter<0.003) | 
+    (anno_hgmd_group.popmax_filter.isna()), 'af_filter'] = 'Pass'
+
 anno_hgmd_group.to_csv('anno.hgmd.gnomAD.filter.popmax.group', sep='\t', index=0, na_rep='NA')
 
 

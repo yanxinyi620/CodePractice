@@ -70,7 +70,7 @@ def get_popmax(vcf):
 
 # anno_hgmd_filter['pop_max'] = anno_hgmd_filter['vcf'].apply(get_popmax)
 anno_hgmd_filter['pop_max'], anno_hgmd_filter['popmax_filter'] = zip(*anno_hgmd_filter['vcf'].apply(get_popmax))
-anno_hgmd_filter1.to_csv('anno.hgmd.gnomAD.filter.popmax', sep='\t', index=0, na_rep='NA')
+anno_hgmd_filter.to_csv('anno.hgmd.gnomAD.filter.popmax', sep='\t', index=0, na_rep='NA')
 
 
 

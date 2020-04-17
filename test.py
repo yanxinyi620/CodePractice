@@ -1,26 +1,37 @@
-ext win stat
 
-19A_V100003275_L02_SE35
-42 42 42 q65
+def pattern_miningAB(smallA, bigB):
+    
+    # smallA: 子字符串序列 (list)
+    # bigB: 总字符串序列 (list)
+    
+    max_compare_len = len(bigB) - len(smallA) + 1
+    compare_start = 0
 
-20A_V100003263_L04_SE35
-43 42 42 q65
--rw-r--r-- 1 yanxinyi rdsz 3.6M Apr 14 21:11 20A_V100003263_L04_SE35_65M.ext.gz
-
-20B_V100003272_L03_SE35
-43 42 43 q95
-
-20B_V100003272_L04_SE35
-43 43 43 q95
-
-CL100095909_L01_SE35
-42 42 42 q95
+    for i in range(compare_start, max_compare_len):
+        for j in bigB:
+            if i in j:
+        
 
 
 
-20A_V100003263_L04_SE35_65M	3.6
-20B_V100003272_L04_SE35_95M	0
-CL100095909_L01_SE35_95M	0
-20B_V100003272_L03_SE35_95M	0
-CL100095969_L01_SE35_95M	28K
-CL100095969_L02_SE35_95M	0
+
+
+# examples
+bigB = ['ab1c', 'bd2d', 'hello', 'world']
+
+smallA_1 = ['ab']
+pattern_miningAB(smallA_1, bigB)
+
+smallA_2 = ['d2d', 'lo']
+pattern_miningAB(smallA_2, bigB)
+
+smallA_3 = ['2d', 'or']
+pattern_miningAB(smallA_3, bigB)
+
+smallA_4 = ['or', 'bd']
+pattern_miningAB(smallA_4, bigB)
+
+smallA_5 = ['dd']
+pattern_miningAB(smallA_5, bigB)
+
+

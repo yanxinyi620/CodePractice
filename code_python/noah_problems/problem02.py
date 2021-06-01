@@ -44,15 +44,15 @@ class Simu_queue(object):
 
 if __name__ == "__main__":
 
-# test1
-queue1 = Simu_queue()
-queue1.push(2)
-queue1.pop()
-queue1.isempty()
+    # test1
+    queue1 = Simu_queue()
+    queue1.push(2)
+    queue1.pop()
+    queue1.isempty()
 
-# test2
-queue2 = Simu_queue()
-queue2.stackA = list(range(10))
-queue2.push(2)
-queue2.pop()
-queue2.isempty()
+    # test2
+    queue2 = Simu_queue()
+    queue2.stackA = list(range(10))
+    queue2.push(2)
+    queue2.pop()
+    queue2.isempty()

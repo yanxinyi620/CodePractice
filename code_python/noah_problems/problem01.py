@@ -17,8 +17,8 @@ A = input()
 getB(A)
 
 
-
-# 利用规则进行处理
+'''
+# 利用规则进行处理(未完成)
 def getB(A):
     A = int(A)
     if A == 0:
@@ -35,5 +35,4 @@ def getB(A):
 
 A = input()
 getB(A)
-
-
+'''

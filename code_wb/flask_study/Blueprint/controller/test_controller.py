@@ -45,7 +45,7 @@ POST请求, 带参数
 http://127.0.0.1:5001/testModule/post_test1
 body 填写 name 和 age
 [GET请求与POST请求获取参数的方式不同, 所以在获取参数时需要注意设定的请求类型, 
-出于安全考虑, 一般一般只用POST请求传参。]
+出于安全考虑, 一般只用POST请求传参。]
 """
 @testModule.route("/post_test1", methods=["POST"])
 def post_test1():

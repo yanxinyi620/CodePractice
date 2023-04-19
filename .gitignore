@@ -12,3 +12,11 @@ code_wb/flask_study/examples/output/
 
 # temp
 mpc_job_utils.py
+
+code_wb/ppc_grpc/proto/*.py
+code_wb/ppc_grpc/proto/*.pyi
+
+code_wb/ppc_grpc/*.crt
+code_wb/ppc_grpc/*.key
+code_wb/ppc_grpc/*.pem
+code_wb/ppc_grpc/key/*

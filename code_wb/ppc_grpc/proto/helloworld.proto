@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc SayHelloAgain (HelloRequest) returns (HelloReply) {}
+  rpc sendXbin (XbinRequest) returns (XbinResponse) {}
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
+
+message XbinRequest {
+  string job_id = 1;
+  bytes data = 2;
+}
+
+message XbinResponse {
+  string job_id = 1;
+  bytes data = 2;
+}

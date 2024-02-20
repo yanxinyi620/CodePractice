@@ -73,7 +73,7 @@ if __name__ == '__main__':
         解密: 2.0ms * N (百次解密 0.2s)
     '''
 
-    feature_num = 10
+    feature_num = 100
     N = 100
     print(f'feature_num: {feature_num}, N: {N}.')
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     w = (np.random.rand(feature_num) - 0.4) * 3
     X = np.random.rand(N, feature_num) * 3
 
-    public_key, private_key = paillier_pk(None, 1024)
+    public_key, private_key = paillier_pk(None, 2048)
 
     # start_time = time.time()
     # encrypted_G = paillier_arrdot(w, X, public_key)
